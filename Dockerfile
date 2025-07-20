@@ -23,6 +23,6 @@ COPY schemas.py .
 EXPOSE 8000
 
 # Define the command to run your FastMCP server when the container starts.
-# `uvicorn <module>:<app_object> --host 0.0.0.0 --port 8000` is the standard way to run a FastAPI app.
-# `mcp_server:app` means: find `mcp_server.py`, and inside it, find the `app` variable.
-CMD ["uvicorn", "mcp_server:app", "--host", "0.0.0.0", "--port", "8000"]
+# `uvicorn <module>:<function_that_returns_app> --host 0.0.0.0 --port 8000`
+# This tells Uvicorn to import `mcp_server` module and call the `main()` function within it.
+CMD ["uvicorn", "mcp_server:main", "--host", "0.0.0.0", "--port", "8000"]
