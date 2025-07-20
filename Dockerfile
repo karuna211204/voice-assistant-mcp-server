@@ -16,7 +16,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # The `.` means copy all content from the current build context (your voice-assistant-mcp-server folder)
 # into the WORKDIR (/app) inside the container.
 COPY mcp_server.py .
-COPY schemas.py . # schemas.py needs to be accessible for mcp_server.py
+COPY schemas.py . 
 
 # Expose the port where FastMCP runs.
 # This tells Docker that the container listens on this port.
