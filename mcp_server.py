@@ -144,19 +144,35 @@ def generate_health_record(input: HealthRecordRequest) -> dict:
         logger.error(f"❌ Failed to generate PDF: {e}")
         return {"status": "error", "message": str(e)}
 
+# In mcp_server.py (at the very bottom)
+# ... (your existing @tool decorated functions) ...
+
 # ----------- MCP Init & Run -----------
 
 mcp = FastMCP(
     name="AI-Health-Multilingual-Voice-agent",
-    tools=tool_registry
+    tools=tool_registry # tool_registry now holds the functions from @tool decorator
 )
 
+# The actual FastAPI application instance is at mcp.app
+# The CMD in Dockerfile should directly point to mcp_server:mcp.app
+# if you want uvicorn to load it this way.
+# We already changed Dockerfile CMD ["uvicorn", "mcp_server:mcp", ...]
+# This means uvicorn will import mcp_server and then look for the object `mcp`.
+# It will then implicitly use `mcp.app` if `mcp` is an instance of FastMCP.
+
+# This block is for local debugging/running directly, not for Dockerized deployment
 if __name__ == "__main__":
     logger.info("🚀 Initializing MCP for AI-Health-Multilingual-Voice-agent...")
     logger.info(f"📂 Excel will be saved to: {EXCEL_PATH}")
     logger.info(f"📂 PDF will be saved to: {PDF_PATH}")
-    tools = asyncio.run(mcp.get_tools())
-    logger.info(f"📦 Total tools registered: {len(tools)}")
-    for name, tool in tools.items():
-        logger.info(f"🔧 Tool loaded: {name}")
-    mcp.run(transport="sse", host="127.0.0.1", port=8000)
+
+    # FastMCP automatically registers tools during mcp = FastMCP(...) initialization.
+    # No need to call asyncio.run(mcp.get_tools()) here if uvicorn is starting it.
+    # tools = asyncio.run(mcp.get_tools()) # Remove or comment this line
+
+    # The mcp.run() method from your older version is also not used with uvicorn.
+    # uvicorn runs the FastAPI app directly.
+    import uvicorn
+    logger.info("Running MCP app with Uvicorn (for local testing)...")
+    uvicorn.run(mcp.app, host="127.0.0.1", port=8000) # Use mcp.app directly here for local run
